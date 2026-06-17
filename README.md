@@ -123,3 +123,75 @@ ENDLOOP.
 ---
 
 *Sonraki bölüm: AC_DOCUMENT BADİ Uygulama Adımları*
+
+# AC_DOCUMENT BADİ – Uygulama Adımları Rehberi
+
+> **Kapsam:** FI Belge Posting – AC_DOCUMENT BADİ Implementasyonu  
+> **İlgili Nesne:** BADİ: AC_DOCUMENT / Implementation: ZAC_DOCUMENT
+
+---
+
+## Adım 1 – SE18'de AC_DOCUMENT BADİ'sini Zle
+
+1. Transaction: **SE18** aç.
+2. **BADİ Definition** alanına `AC_DOCUMENT` yaz → **Display** ile aç.
+3. Menüden **Implementation → Create** seçeneğine tıkla.
+4. Aşağıdaki değerleri gir:
+
+| Alan | Değer |
+|---|---|
+| Implementation Name | `ZAC_DOCUMENT` |
+| Implementation Short Text | `ZAC_DOCUMENT` |
+| Definition Name | `AC_DOCUMENT` |
+
+5. **Interface** sekmesine geç. Aşağıdaki değerlerin otomatik geldiğini doğrula:
+
+| Alan | Değer |
+|---|---|
+| Interface Name | `IF_EX_AC_DOCUMENT` |
+| Name of Implementing Class | `ZCL_IM_AC_DOCUMENT` |
+
+6. **Kaydet** ve **Aktive et**.
+
+> ✅ Aktivasyon sonrası **Runtime Behavior** alanında `Implementation will be called` yazması gerekir.
+
+---
+
+## Adım 2 – ZCL_IM_AC_DOCUMENT Sınıfına Kodu Yaz
+
+BADİ implementasyonu aktive edildikten sonra ilgili metodun içine kod yazılacaktır.
+
+1. **Interface** sekmesinde metodun üzerine çift tıkla.
+2. Hangi metoda kod yazılacağını belirle:
+
+| Method | Açıklama |
+|---|---|
+| `CHANGE_INITIAL` | AC bileşenleri çağrılmadan önce FI/CO belgesi üzerinde değişiklik yapılır |
+| `CHANGE_AFTER_CHECK` | AC bileşenleri eklendikten sonra FI/CO belgesi üzerinde değişiklik yapılır |
+| `IS_SUPPRESSED_ACCT` | ACCT* tablolarının güncellenmemesi için kullanılır (SAP Note 48009) |
+| `IS_COMPRESSION_REQUIRED` | İç tablolarda TABLE_COMPRESS uygulanır (SAP Note 320959) |
+| `IS_ACCTIT_RELEVANT` | Ek AWTYPs için ACCT* güncellemesi aktive edilir |
+
+3. İlgili metodu seç, kodu yaz, **kaydet** ve **aktive et**.
+
+---
+
+## Adım 3 – Test Et
+
+1. FI belgesi oluşturan bir transaction aç (örn. **FB01**, **F-02**).
+2. Belgeyi kaydet.
+3. BADİ metodunun tetiklendiğini doğrulamak için **breakpoint** koy veya log tut.
+
+---
+
+## Özet Adımlar
+
+```
+1. SE18  → AC_DOCUMENT BADİ'sini aç → ZAC_DOCUMENT implementasyonu oluştur ve aktive et
+2. SE24  → ZCL_IM_AC_DOCUMENT sınıfı içinde ilgili metoda kodu yaz ve aktive et
+3. FB01  → Test belgesi oluşturarak BADİ'nin tetiklendiğini doğrula
+```
+
+---
+
+*Doküman sonu*
