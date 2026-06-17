@@ -172,15 +172,71 @@ BADİ implementasyonu aktive edildikten sonra ilgili metodun içine kod yazılac
 | `IS_COMPRESSION_REQUIRED` | İç tablolarda TABLE_COMPRESS uygulanır (SAP Note 320959) |
 | `IS_ACCTIT_RELEVANT` | Ek AWTYPs için ACCT* güncellemesi aktive edilir |
 
-3. İlgili metodu seç, kodu yaz, **kaydet** ve **aktive et**.
+3. `CHANGE_INITIAL` metodunu seç (çift tıkla) ve aşağıdaki kodu yaz:
+
+```abap
+DATA: lv_belnr TYPE bseg-belnr,
+      lv_buzei TYPE bseg-buzei,
+      lv_gjahr TYPE bseg-gjahr.
+
+MOVE-CORRESPONDING im_document-header TO ex_document-header.
+
+IF sy-tcode EQ 'FAGL_FCV'.
+
+  LOOP AT im_document-item REFERENCE INTO DATA(lr_item).
+    APPEND INITIAL LINE TO ex_document-item REFERENCE INTO DATA(lr_ex_item).
+    MOVE-CORRESPONDING lr_item->* TO lr_ex_item->*.
+
+    TRY.
+        SPLIT lr_item->sgtxt AT ' ' INTO lv_belnr lv_buzei lv_gjahr DATA(lv_bos).
+
+        lv_belnr = |{ lv_belnr ALPHA = IN }|.
+        lv_buzei = |{ lv_buzei ALPHA = IN }|.
+
+        SELECT SINGLE * FROM bseg
+          WHERE bukrs EQ @lr_item->bukrs
+            AND belnr EQ @lv_belnr
+            AND buzei EQ @lv_buzei
+            AND gjahr EQ @lv_gjahr
+          INTO @DATA(ls_bseg).
+
+        IF sy-subrc IS INITIAL.
+          CASE ls_bseg-koart.
+            WHEN 'K'.
+              lr_ex_item->zuonr = |K-{ ls_bseg-lifnr }|.
+            WHEN 'D'.
+              lr_ex_item->zuonr = |D-{ ls_bseg-kunnr }|.
+            WHEN 'S'.
+              lr_ex_item->zuonr = |S-{ ls_bseg-hkont }|.
+          ENDCASE.
+        ENDIF.
+
+      CATCH cx_root.
+        MESSAGE e001(00) WITH 'Hatalı tanım!'.
+    ENDTRY.
+
+  ENDLOOP.
+
+ENDIF.
+```
+
+> 💡 **Kodun mantığı:**
+> - Yalnızca **`FAGL_FCV`** (Döviz Yeniden Değerleme) transaction'ında çalışır.
+> - Her belge kalemi için `sgtxt` (açıklama) alanı boşlukla ayrılarak `belnr`, `buzei`, `gjahr` bilgilerine parse edilir.
+> - Bu bilgilerle `BSEG` tablosundan orijinal belge satırı okunur.
+> - Bulunan satırın `koart` değerine göre `zuonr` alanı `K-`, `D-` veya `S-` prefiksiyle doldurulur.
+> - Hata durumunda `cx_root` yakalanarak kullanıcıya hata mesajı gösterilir.
+
+4. **Kaydet** ve **Aktive et**.
 
 ---
 
 ## Adım 3 – Test Et
 
-1. FI belgesi oluşturan bir transaction aç (örn. **FB01**, **F-02**).
-2. Belgeyi kaydet.
-3. BADİ metodunun tetiklendiğini doğrulamak için **breakpoint** koy veya log tut.
+1. Transaction: **FAGL_FCV** (Döviz Yeniden Değerleme) aç.
+2. İlgili parametreleri girerek çalıştır.
+3. Oluşan belgeleri **FB03** ile aç → ilgili kalemlerin **ZUONR** alanının `K-`, `D-` veya `S-` prefiksiyle dolduğunu doğrula.
+4. BADİ metodunun tetiklendiğini doğrulamak için gerekirse `CHANGE_INITIAL` metoduna **breakpoint** koy.
 
 ---
 
