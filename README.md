@@ -34,16 +34,11 @@ BTE 1120, `BSEG_SUBST` yapısını kullanır. Özel alanlar eklemek için append
 2. **Structure** alanına `BSEG_SUBST` yaz → **Display** ile aç.
 3. Menüden **Extras → Append Structure → Create** seçeneğine tıkla.
 4. Append structure adını gir: **`ZFI_000_BSEG_SUBST`**
-5. **Components** sekmesine geç ve aşağıdaki alanları ekle:
+5. **Components** sekmesine geç ve aşağıdaki alanları ekle:(Kullancağın alanları)
 
 | Component | Typing Method | Component Type | Data Type | Length | Decimals | Kısa Tanım |
 |---|---|---|---|---|---|---|
 | `HKONT` | Types | `HKONT` | CHAR | 10 | 0 | Defter kebiri hesabı |
-| `ACROBJ_ID` | Types | `ACR_OBJ_ID` | CHAR | 32 | 0 | Dönemselleştirme nesnesi |
-| `DMBTR` | Types | `DMBTR` | CURR | 23 | 2 | Ulusal para birimi tutarı |
-| `DMBE2` | Types | `DMBE2` | CURR | 23 | 2 | İkinci ulusal para birimi tutarı |
-| `DMBE3` | Types | `DMBE3` | CURR | 23 | 2 | Üçüncü ulusal para birimi tutarı |
-| `WRBTR` | Types | `WRBTR` | CURR | 23 | 2 | Belge para birimi tutarı |
 
 6. **Kaydet** ve **Aktive et** (Activate).
 
